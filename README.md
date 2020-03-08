@@ -17,6 +17,7 @@ data
         └── val
 ```
 Example input mask, output image and ground truth image:
+
 ![mask](ex_imgs/mask_to_city/mask_image_0.png) ![generated image](ex_imgs/mask_to_city/image_0.png) ![ground truth](ex_imgs/mask_to_city/ori_image_0.png) 
 
 ## Autoencoder for MNIST
