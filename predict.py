@@ -9,7 +9,7 @@ from PIL import Image
 from torchvision import transforms
 
 from unet import UNet
-from utils.data_vis import plot_img_and_mask
+from utils.data_vis import plot_input_vs_output
 from utils.dataset import BasicDataset
 
 
@@ -93,8 +93,8 @@ def get_output_filenames(args):
     return out_files
 
 
-def mask_to_image(mask):
-    return Image.fromarray((mask * 255).astype(np.uint8))
+def array_to_image(array):
+    return Image.fromarray((array * 255).astype(np.uint8))
 
 
 if __name__ == "__main__":
@@ -118,7 +118,7 @@ if __name__ == "__main__":
 
         img = Image.open(fn)
 
-        mask = predict_img(net=net,
+        pred = predict_img(net=net,
                            full_img=img,
                            scale_factor=args.scale,
                            out_threshold=args.mask_threshold,
@@ -126,11 +126,11 @@ if __name__ == "__main__":
 
         if not args.no_save:
             out_fn = out_files[i]
-            result = mask_to_image(mask)
+            result = array_to_image(pred)
             result.save(out_files[i])
 
             logging.info("Mask saved to {}".format(out_files[i]))
 
         if args.viz:
             logging.info("Visualizing results for image {}, close to continue ...".format(fn))
-            plot_img_and_mask(img, mask)
+            plot_input_vs_output(img, pred)

@@ -13,15 +13,10 @@ def eval_net(net, loader, device, n_val):
     with tqdm(total=n_val, desc='Validation round', unit='img', leave=False) as pbar:
         for batch in loader:
             imgs = batch['image']
-            true_masks = batch['mask']
-
             imgs = imgs.to(device=device, dtype=torch.float32)
-            mask_type = torch.float32 if net.n_classes == 1 else torch.long
-            true_masks = true_masks.to(device=device, dtype=mask_type)
+            imgs_pred = net(imgs)
 
-            mask_pred = net(imgs)
-
-            for true_mask, pred in zip(true_masks, mask_pred):
+            for true_mask, pred in zip(imgs, imgs_pred):
                 pred = (pred > 0.5).float()
                 if net.n_classes > 1:
                     tot += F.cross_entropy(pred.unsqueeze(dim=0), true_mask.unsqueeze(dim=0)).item()

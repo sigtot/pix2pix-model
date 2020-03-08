@@ -6,3 +6,6 @@ checkpoints/
 *.jpg
 SUBMISSION*
 venv/
+mlp_img/
+runs/
+.idea/
