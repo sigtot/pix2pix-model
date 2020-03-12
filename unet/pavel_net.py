@@ -13,28 +13,32 @@ class EncodeModule(nn.Module):
         self.layers.add_module('relu', nn.LeakyReLU(negative_slope=0.2, inplace=True))
 
     def forward(self, x):
-        print(x.size())
-        return self.layers(x)
+        out = self.layers(x)
+        #print(out.size())
+        return out
 
 
 class DecodeModule(nn.Module):
     def __init__(self, in_c, out_c, dropout=False):
         super(DecodeModule, self).__init__()
+        self.up = nn.ConvTranspose2d(in_c // 2, out_c // 2, 4, stride=2, padding=1)
         self.layers = nn.Sequential()
-        self.layers.add_module('conv', nn.ConvTranspose2d(in_c, out_c, 4, stride=2))
         self.layers.add_module('bn', nn.BatchNorm2d(out_c))
         if dropout:
             self.layers.add_module('do', nn.Dropout2d(p=0.5, inplace=True))
         self.layers.add_module('relu', nn.ReLU(inplace=True))
 
     def forward(self, x1, x2):
+        x1 = self.up(x1)
         dw = x2.size(2) - x1.size(2)
         dh = x2.size(3) - x1.size(3)
         x1 = F.pad(x1, [dw // 2, dw - dw // 2, dh // 2, dh - dh // 2])
-        print("x1", x1.size())
-        print("x2", x2.size())
+        #print("x1", x1.size())
+        #print("x2", x2.size())
         x = torch.cat([x1, x2], dim=1)
-        return self.layers(x)
+        out = self.layers(x)
+        #print(out.size())
+        return out
 
 
 class PavelNet(nn.Module):
@@ -51,15 +55,15 @@ class PavelNet(nn.Module):
         self.e8 = EncodeModule(512, 512)  # 2 -> 1
 
         # CD512-CD1024-CD1024-C1024-C1024-C512-C256-C128
-        self.d1 = DecodeModule(1024, 512, dropout=True)
-        self.d2 = DecodeModule(1024, 512, dropout=True)
-        self.d3 = DecodeModule(1024, 512, dropout=True)
-        self.d4 = DecodeModule(1024, 256)
-        self.d5 = DecodeModule(1024, 128)
-        self.d6 = DecodeModule(512, 64)
-        self.d7 = DecodeModule(256, 32)
+        self.d1 = DecodeModule(1024, 1024, dropout=True)
+        self.d2 = DecodeModule(2048, 1024, dropout=True)
+        self.d3 = DecodeModule(2048, 1024, dropout=True)
+        self.d4 = DecodeModule(2048, 1024)
+        self.d5 = DecodeModule(2048, 512)
+        self.d6 = DecodeModule(1024, 256)
+        self.d7 = DecodeModule(512, 128)
         self.out = nn.Sequential(
-            nn.ConvTranspose2d(32, 3, 4, stride=2),
+            nn.ConvTranspose2d(128, 3, 4, stride=2, padding=1),
             nn.Tanh()
         )
 
