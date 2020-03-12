@@ -21,9 +21,9 @@ class EncodeModule(nn.Module):
 class DecodeModule(nn.Module):
     def __init__(self, in_c, out_c, dropout=False):
         super(DecodeModule, self).__init__()
-        self.up = nn.ConvTranspose2d(in_c // 2, out_c // 2, 4, stride=2, padding=1)
+        self.up = nn.ConvTranspose2d(in_c, out_c, 4, stride=2, padding=1)
         self.layers = nn.Sequential()
-        self.layers.add_module('bn', nn.BatchNorm2d(out_c))
+        self.layers.add_module('bn', nn.BatchNorm2d(out_c*2))
         if dropout:
             self.layers.add_module('do', nn.Dropout2d(p=0.5, inplace=True))
         self.layers.add_module('relu', nn.ReLU(inplace=True))
@@ -55,13 +55,13 @@ class PavelNet(nn.Module):
         self.e8 = EncodeModule(512, 512)  # 2 -> 1
 
         # CD512-CD1024-CD1024-C1024-C1024-C512-C256-C128
-        self.d1 = DecodeModule(1024, 1024, dropout=True)
-        self.d2 = DecodeModule(2048, 1024, dropout=True)
-        self.d3 = DecodeModule(2048, 1024, dropout=True)
-        self.d4 = DecodeModule(2048, 1024)
-        self.d5 = DecodeModule(2048, 512)
-        self.d6 = DecodeModule(1024, 256)
-        self.d7 = DecodeModule(512, 128)
+        self.d1 = DecodeModule(512, 512, dropout=True)
+        self.d2 = DecodeModule(1024, 512, dropout=True)
+        self.d3 = DecodeModule(1024, 512, dropout=True)
+        self.d4 = DecodeModule(1024, 512)
+        self.d5 = DecodeModule(1024, 256)
+        self.d6 = DecodeModule(512, 128)
+        self.d7 = DecodeModule(256, 64)
         self.out = nn.Sequential(
             nn.ConvTranspose2d(128, 3, 4, stride=2, padding=1),
             nn.Tanh()
