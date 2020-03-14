@@ -21,7 +21,7 @@ class EncodeModule(nn.Module):
 class DecodeModule(nn.Module):
     def __init__(self, in_c, out_c, dropout=False):
         super(DecodeModule, self).__init__()
-        self.up = nn.ConvTranspose2d(in_c, out_c, 4, stride=2, padding=1)
+        self.up = nn.ConvTranspose2d(in_c, out_c, 4, stride=2)
         self.layers = nn.Sequential()
         self.layers.add_module('bn', nn.BatchNorm2d(out_c*2))
         if dropout:
