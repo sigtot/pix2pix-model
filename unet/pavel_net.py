@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 
 class EncodeModule(nn.Module):
-    def __init__(self, in_c, out_c, batchnorm=False):
+    def __init__(self, in_c, out_c, batchnorm=True):
         super(EncodeModule, self).__init__()
         self.layers = nn.Sequential()
         self.layers.add_module('conv', nn.Conv2d(in_c, out_c, 4, stride=2, padding=1))
@@ -19,11 +19,12 @@ class EncodeModule(nn.Module):
 
 
 class DecodeModule(nn.Module):
-    def __init__(self, in_c, out_c, dropout=False):
+    def __init__(self, in_c, out_c, batchnorm=True, dropout=False):
         super(DecodeModule, self).__init__()
         self.up = nn.ConvTranspose2d(in_c, out_c, 4, stride=2)
         self.layers = nn.Sequential()
-        self.layers.add_module('bn', nn.BatchNorm2d(out_c*2))
+        if batchnorm:
+            self.layers.add_module('bn', nn.BatchNorm2d(out_c*2))
         if dropout:
             self.layers.add_module('do', nn.Dropout2d(p=0.5, inplace=True))
         self.layers.add_module('relu', nn.ReLU(inplace=True))
@@ -45,14 +46,14 @@ class PavelNet(nn.Module):
     def __init__(self):
         super(PavelNet, self).__init__()
         # C64-C128-C256-C512-C512-C512-C512-C512
-        self.e1 = EncodeModule(3, 64, batchnorm=True)  # 256 -> 128
+        self.e1 = EncodeModule(3, 64, batchnorm=False)  # 256 -> 128
         self.e2 = EncodeModule(64, 128)  # 128 -> 64
         self.e3 = EncodeModule(128, 256)  # 64 -> 32
         self.e4 = EncodeModule(256, 512)  # 32 -> 16
         self.e5 = EncodeModule(512, 512)  # 16 -> 8
         self.e6 = EncodeModule(512, 512)  # 8 -> 4
         self.e7 = EncodeModule(512, 512)  # 4 -> 2
-        self.e8 = EncodeModule(512, 512)  # 2 -> 1
+        self.e8 = EncodeModule(512, 512, batchnorm=False)  # 2 -> 1
 
         # CD512-CD1024-CD1024-C1024-C1024-C512-C256-C128
         self.d1 = DecodeModule(512, 512, dropout=True)
