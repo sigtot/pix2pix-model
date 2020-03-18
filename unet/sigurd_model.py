@@ -22,11 +22,9 @@ class SigurdModel(nn.Module):
         self.l1loss = nn.L1Loss()
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    def set_input(self, real_x, real_y):
+    def forward(self, real_x, real_y):
         self.real_x = real_x
         self.real_y = real_y
-
-    def forward(self):
         self.generated = self.generator.forward(self.real_x)
         return self.generated
 
