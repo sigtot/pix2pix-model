@@ -49,4 +49,4 @@ class SigurdModel(nn.Module):
         loss_discriminator.backward()
         self.opt_discriminator.step()
 
-        return loss_generator.data
+        return loss_generator.data, loss_discriminator.data
