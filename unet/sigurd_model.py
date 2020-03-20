@@ -30,18 +30,19 @@ class SigurdModel(nn.Module):
 
     def backward(self):
         pred_fake = self.discriminator(torch.cat((self.real_x, self.generated), 1))
-        pred_real = self.discriminator(torch.cat((self.real_x, self.real_y), 1))
 
         loss_generator = self.loss(pred_fake, torch.ones_like(pred_fake, device=self.device,
                                                               requires_grad=False)) + self.l1loss.forward(
             self.generated, self.real_x)
 
         self.opt_generator.zero_grad()
-        loss_generator.backward(retain_graph=True)
+        loss_generator.backward()
         self.opt_generator.step()
 
+        pred_fake = self.discriminator(torch.cat((self.real_x, self.generated), 1).detach())
+        pred_real = self.discriminator(torch.cat((self.real_x, self.real_y), 1))
         loss_discriminator = 0.5 * (
-                self.loss(pred_fake.detach(), torch.zeros_like(pred_fake, device=self.device, requires_grad=False))
+                self.loss(pred_fake, torch.zeros_like(pred_fake, device=self.device, requires_grad=False))
                 + self.loss(pred_real, torch.ones_like(pred_real, device=self.device, requires_grad=False))
         )
 
