@@ -41,7 +41,7 @@ class SigurdModel(nn.Module):
         self.opt_generator.step()
 
         loss_discriminator = 0.5 * (
-                self.loss(pred_fake, torch.zeros_like(pred_fake, device=self.device, requires_grad=False))
+                self.loss(pred_fake.detach(), torch.zeros_like(pred_fake, device=self.device, requires_grad=False))
                 + self.loss(pred_real, torch.ones_like(pred_real, device=self.device, requires_grad=False))
         )
 
