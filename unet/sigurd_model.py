@@ -30,7 +30,7 @@ class SigurdModel(nn.Module):
 
     def backward(self):
         gen_pair = torch.cat((self.real_x, self.generated), 1)
-        pred_fake = self.discriminator(gen_pair.detach())  # detach to disable backprop for generator
+        pred_fake = self.discriminator(gen_pair)
         real_pair = torch.cat((self.real_x, self.real_y), 1)
         pred_real = self.discriminator(real_pair)
 
@@ -43,7 +43,7 @@ class SigurdModel(nn.Module):
         self.opt_generator.step()
 
         loss_discriminator = self.disc_mult * (
-                self.loss(pred_fake, torch.zeros_like(pred_fake, device=self.device, requires_grad=False))
+                self.loss(pred_fake, torch.zeros_like(pred_fake.detach(), device=self.device, requires_grad=False))
                 + self.loss(pred_real, torch.ones_like(pred_real, device=self.device, requires_grad=False))
         )
 
