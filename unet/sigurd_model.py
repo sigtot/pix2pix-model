@@ -7,17 +7,17 @@ from .pavel_net import PavelNet
 
 
 class SigurdModel(nn.Module):
-    def __init__(self):
+    def __init__(self, lr, betas, weight_decay, disc_mult):
         super(SigurdModel, self).__init__()
         self.discriminator = ArtNet()
         self.generator = PavelNet()
 
-        lr = 0.0002
-        self.opt_discriminator = torch.optim.Adam(self.discriminator.parameters(), lr=lr, weight_decay=1e-8,
-                                                  betas=(0.5, 0.999))
-        self.opt_generator = torch.optim.Adam(self.generator.parameters(), lr=lr, weight_decay=1e-8,
-                                              betas=(0.5, 0.999))
+        self.opt_discriminator = torch.optim.Adam(self.discriminator.parameters(), lr=lr, weight_decay=weight_decay,
+                                                  betas=betas)
+        self.opt_generator = torch.optim.Adam(self.generator.parameters(), lr=lr, weight_decay=weight_decay,
+                                              betas=betas)
 
+        self.disc_mult = disc_mult
         self.loss = nn.MSELoss()
         self.l1loss = nn.L1Loss()
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -43,6 +43,7 @@ class SigurdModel(nn.Module):
         pred_real = self.discriminator(torch.cat((self.real_x, self.real_y), 1))
         loss_discriminator = 0.5 * (
                 self.loss(pred_fake, torch.zeros_like(pred_fake, device=self.device, requires_grad=False))
+
                 + self.loss(pred_real, torch.ones_like(pred_real, device=self.device, requires_grad=False))
         )
 
