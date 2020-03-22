@@ -7,7 +7,7 @@ from .pavel_net import PavelNet
 
 
 class SigurdModel(nn.Module):
-    def __init__(self, lr, betas, weight_decay, disc_mult):
+    def __init__(self, lr, betas, weight_decay, disc_mult, l1_mult):
         super(SigurdModel, self).__init__()
         self.discriminator = ArtNet()
         self.generator = PavelNet()
@@ -18,6 +18,7 @@ class SigurdModel(nn.Module):
                                               betas=betas)
 
         self.disc_mult = disc_mult
+        self.l1_mult = l1_mult
         self.loss = nn.MSELoss()
         self.l1loss = nn.L1Loss()
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -32,8 +33,8 @@ class SigurdModel(nn.Module):
         pred_fake = self.discriminator(torch.cat((self.real_x, self.generated), 1))
 
         loss_generator = self.loss(pred_fake, torch.ones_like(pred_fake, device=self.device,
-                                                              requires_grad=False)) + self.l1loss.forward(
-            self.generated, self.real_x)
+                                                              requires_grad=False)) + self.l1_mult * self.l1loss.forward(
+            self.generated, self.real_y)
 
         self.opt_generator.zero_grad()
         loss_generator.backward()
@@ -41,9 +42,8 @@ class SigurdModel(nn.Module):
 
         pred_fake = self.discriminator(torch.cat((self.real_x, self.generated), 1).detach())
         pred_real = self.discriminator(torch.cat((self.real_x, self.real_y), 1))
-        loss_discriminator = 0.5 * (
+        loss_discriminator = self.dist_mult * (
                 self.loss(pred_fake, torch.zeros_like(pred_fake, device=self.device, requires_grad=False))
-
                 + self.loss(pred_real, torch.ones_like(pred_real, device=self.device, requires_grad=False))
         )
 
