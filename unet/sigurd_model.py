@@ -42,7 +42,7 @@ class SigurdModel(nn.Module):
 
         pred_fake = self.discriminator(torch.cat((self.real_x, self.generated), 1).detach())
         pred_real = self.discriminator(torch.cat((self.real_x, self.real_y), 1))
-        loss_discriminator = self.dist_mult * (
+        loss_discriminator = self.disc_mult * (
                 self.loss(pred_fake, torch.zeros_like(pred_fake, device=self.device, requires_grad=False))
                 + self.loss(pred_real, torch.ones_like(pred_real, device=self.device, requires_grad=False))
         )
