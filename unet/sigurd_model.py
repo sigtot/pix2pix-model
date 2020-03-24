@@ -17,11 +17,22 @@ class SigurdModel(nn.Module):
         self.opt_generator = torch.optim.Adam(self.generator.parameters(), lr=lr, weight_decay=weight_decay,
                                               betas=betas)
 
+        self.discriminator.apply(self.init_weights)
+        self.generator.apply(self.init_weights)
+
         self.disc_mult = disc_mult
         self.l1_mult = l1_mult
         self.loss = nn.MSELoss()
         self.l1loss = nn.L1Loss()
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+    def init_weights(self, m):
+        classname = m.__class__.__name__
+        if classname.find('Conv') != -1:
+            m.weight.data.normal_(0.0, 0.02)
+        elif classname.find('BatchNorm') != -1:
+            m.weight.data.normal_(1.0, 0.02)
+            m.bias.data.fill_(0)
 
     def forward(self, real_x, real_y):
         self.real_x = real_x
