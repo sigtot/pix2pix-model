@@ -198,4 +198,4 @@ class Cityscapes(VisionDataset):
         return data
 
     def _get_target_suffix(self, mode, target_type):
-        return '.jpg'
+        return ''  # yes, no suffix
