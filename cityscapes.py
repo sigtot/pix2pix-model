@@ -150,8 +150,7 @@ class Cityscapes(VisionDataset):
             for file_name in os.listdir(img_dir):
                 target_types = []
                 for t in self.target_type:
-                    target_name = '{}_{}'.format(file_name.split('_leftImg8bit')[0],
-                                                 self._get_target_suffix(self.mode, t))
+                    target_name = file_name
                     target_types.append(os.path.join(target_dir, target_name))
 
                 self.images.append(os.path.join(img_dir, file_name))
