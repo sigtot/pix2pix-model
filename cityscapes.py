@@ -1,8 +1,10 @@
 import json
 import os
+import random
 from collections import namedtuple
 import zipfile
 
+import numpy as np
 from torchvision.datasets.utils import extract_archive, verify_str_arg, iterable_to_str
 from torchvision.datasets.vision import VisionDataset
 from PIL import Image
@@ -179,7 +181,11 @@ class Cityscapes(VisionDataset):
         target = tuple(targets) if len(targets) > 1 else targets[0]
 
         if self.transforms is not None:
-            image, target = self.transforms(image, target)
+            seed = np.random.randint(2147483647)
+            random.seed(seed)
+            image = self.transforms(image)
+            random.seed(seed)
+            target = self.transforms(target)
 
         return image, target
 
