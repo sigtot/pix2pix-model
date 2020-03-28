@@ -47,7 +47,7 @@ class SigurdModel(nn.Module):
             self.opt_generator.zero_grad()
             loss_generator.backward()
             self.opt_generator.step()
-            return
+            return loss_generator.data, None
 
         pred_fake = self.discriminator(torch.cat((self.real_x, self.generated), 1))
 
